@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Productividad con método</title>
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --accent:#7dd3fc; --muted:#9aa6b2;
+      --glass: rgba(255,255,255,0.03);
+      color-scheme: dark;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,#071124 0%, #071b2a 100%); color:#e6eef6;
+      padding:24px;
+      -webkit-font-smoothing:antialiased;
+    }
+    .wrap{max-width:920px;margin:0 auto;display:grid;grid-template-columns:1fr 340px;gap:20px}
+    header{grid-column:1/-1; display:flex;align-items:center;justify-content:space-between}
+    h1{margin:0;font-size:1.4rem}
+    p.lead{margin:6px 0 0;color:var(--muted);font-size:0.95rem}
+
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:12px;padding:18px;box-shadow:0 6px 18px rgba(2,6,23,0.6);
+      border:1px solid rgba(255,255,255,0.03);
+    }
+
+    /* Main column */
+    .main .section{margin-bottom:16px}
+    .tips{display:flex;gap:8px;flex-wrap:wrap}
+    .tip{background:var(--glass);padding:10px;border-radius:8px;color:var(--muted);font-size:0.92rem}
+
+    /* Sidebar */
+    .sidebar{display:flex;flex-direction:column;gap:16px}
+    .timer{display:flex;flex-direction:column;align-items:center;gap:12px}
+    .time{font-size:2.4rem;font-weight:600}
+    .controls{display:flex;gap:8px}
+    button{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:8px;color:inherit;cursor:pointer}
+    button.primary{background:linear-gradient(90deg,var(--accent), #60a5fa); color:#06202b; border:none; font-weight:600}
+    .todo {display:flex;flex-direction:column;gap:8px}
+    .todo input[type="text"]{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    ul.checklist{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+    li.item{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;background:rgba(255,255,255,0.01)}
+    li.item.completed{opacity:0.6;text-decoration:line-through}
+    .progressbar{height:10px;background:rgba(255,255,255,0.03);border-radius:8px;overflow:hidden}
+    .progress{height:100%;width:0%;background:linear-gradient(90deg,var(--accent), #4ade80)}
+    footer{grid-column:1/-1;margin-top:6px;color:var(--muted);font-size:0.9rem;text-align:center}
+    @media (max-width:880px){
+      .wrap{grid-template-columns:1fr; padding:0 6px}
+      .sidebar{order:2}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Productividad con método</h1>
+        <p class="lead">Pequeños hábitos, gran diferencia — tips prácticos y herramientas para concentrarte.</p>
+      </div>
+      <div style="text-align:right;color:var(--muted);font-size:0.9rem">Tiempo estimado de lectura: 1–2 min</div>
+    </header>
+
+    <main class="card main">
+      <section class="section">
+        <h2 style="margin-top:0">Breve guía</h2>
+        <p style="color:var(--muted)">Divide tu día en bloques, elimina distracciones y revisa resultados. Aquí tienes tres ideas rápidas:</p>
+        <div class="tips" id="tipsContainer">
+          <div class="tip">1. Usa el método Pomodoro: 25 min foco, 5 min descanso.</div>
+          <div class="tip">2. Una regla: ¡una sola tarea a la vez!</div>
+          <div class="tip">3. Prioriza por impacto, no por urgencia.</div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h3 style="margin:0 0 8px 0">Consejo aleatorio</h3>
+        <div style="display:flex;gap:10px;align-items:center">
+          <div id="randomTip" class="tip" style="flex:1">Pulsa "Nuevo consejo" para inspirarte.</div>
+          <button id="newTipBtn">Nuevo consejo</button>
+        </div>
+      </section>
+
+      <section class="section">
+        <h3 style="margin:0 0 8px 0">Mini-resumen</h3>
+        <ul style="margin:0 0 0 18px;color:var(--muted)">
+          <li>Planifica 3 tareas clave al día.</li>
+          <li>Mide progreso con una barra simple.</li>
+          <li>Reflexiona 5 minutos al final del día.</li>
+        </ul>
+      </section>
+    </main>
+
+    <aside class="sidebar">
+      <div class="card timer" aria-label="Temporizador Pomodoro">
+        <div style="text-align:center;width:100%">
+          <div style="font-size:0.85rem;color:var(--muted)">Pomodoro</div>
+          <div id="timeDisplay" class="time">25:00</div>
+        </div>
+        <div class="controls">
+          <button id="startBtn" class="primary">Iniciar</button>
+          <button id="stopBtn">Pausa</button>
+          <button id="resetBtn">Reset</button>
+        </div>
+        <div style="width:100%;margin-top:6px">
+          <div class="progressbar" aria-hidden="true"><div id="progress" class="progress"></div></div>
+        </div>
+      </div>
+
+      <div class="card todo" aria-label="Lista de tareas">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong>Lista rápida</strong>
+          <small style="color:var(--muted)">3 tareas recomendadas</small>
+        </div>
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <input id="newTask" type="text" placeholder="Añade una tarea (ej: Repasar notas)" />
+          <button id="addTask">Añadir</button>
+        </div>
+        <ul id="checklist" class="checklist" aria-live="polite">
+          <li class="item"><input type="checkbox" /> <span>Plan diario (3 prioridades)</span></li>
+          <li class="item"><input type="checkbox" /> <span>Bloque de trabajo sin distracciones</span></li>
+        </ul>
+      </div>
+    </aside>
+
+    <footer>
+      ¿Quieres que te explique cómo funciona cada parte del código o prefieres una versión bilingüe (ES/EN)? Dime y la adapto.
+    </footer>
+  </div>
+
+  <script>
+    // --- Tips ---
+    const tips = [
+      "Trabaja en bloques: 90 minutos máximo de foco profundo.",
+      "Apaga notificaciones del móvil durante un bloque.",
+      "Empieza por la tarea que te da más resistencia.",
+      "Anota interrupciones y resuélvelas al final del bloque.",
+      "Revisa tu lista 2 veces al día: mañana y tarde.",
+      "Agrupa tareas similares (batching) para ahorrar cambios de contexto."
+    ];
+    const newTipBtn = document.getElementById('newTipBtn');
+    const randomTip = document.getElementById('randomTip');
+    newTipBtn.addEventListener('click', ()=> {
+      const t = tips[Math.floor(Math.random()*tips.length)];
+      randomTip.textContent = t;
+    });
+
+    // --- Simple Pomodoro (25:00) ---
+    let duration = 25*60; // seconds
+    let remaining = duration;
+    let timer = null;
+    const timeDisplay = document.getElementById('timeDisplay');
+    const progress = document.getElementById('progress');
+
+    function formatTime(s){
+      const mm = Math.floor(s/60).toString().padStart(2,'0');
+      const ss = (s%60).toString().padStart(2,'0');
+      return `${mm}:${ss}`;
+    }
+    function updateUI(){
+      timeDisplay.textContent = formatTime(remaining);
+      progress.style.width = `${(100*(duration-remaining)/duration).toFixed(2)}%`;
+    }
+    document.getElementById('startBtn').addEventListener('click', ()=>{
+      if(timer) return;
+      timer = setInterval(()=>{
+        if(remaining>0){
+          remaining--;
+          updateUI();
+        } else {
+          clearInterval(timer); timer=null;
+          alert('¡Bloque completado! Toma 5 minutos de descanso.');
+          remaining = duration; updateUI();
+        }
+      },1000);
+    });
+    document.getElementById('stopBtn').addEventListener('click', ()=>{
+      if(timer) { clearInterval(timer); timer=null; }
+    });
+    document.getElementById('resetBtn').addEventListener('click', ()=>{
+      if(timer) { clearInterval(timer); timer=null; }
+      remaining = duration; updateUI();
+    });
+    updateUI();
+
+    // --- Checklist simple ---
+    const addTask = document.getElementById('addTask');
+    const newTask = document.getElementById('newTask');
+    const checklist = document.getElementById('checklist');
+
+    addTask.addEventListener('click', ()=> {
+      const text = newTask.value.trim();
+      if(!text) return;
+      const li = document.createElement('li');
+      li.className = 'item';
+      li.innerHTML = `<input type="checkbox"> <span>${text}</span>`;
+      checklist.prepend(li);
+      newTask.value = '';
+    });
+
+    checklist.addEventListener('change', (e)=> {
+      const li = e.target.closest('li');
+      if(!li) return;
+      li.classList.toggle('completed', e.target.checked);
+    });
+
+    // Accessibility: allow Enter to add task
+    newTask.addEventListener('keyup', (e)=> { if(e.key==='Enter') addTask.click(); });
+  </script>
+</body>
+</html>
